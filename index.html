@@ -323,8 +323,8 @@ function render(){
   document.getElementById('nextBtn').disabled=(L>=365);
   document.getElementById('navHint').textContent=data.mode==='auto'?'(auto · tap to take over)':'';
 
-  // commentary: search the channel for this lesson — lands the matching video on top
-  document.getElementById('commentaryBtn').href='https://www.youtube.com/channel/UCr7RBMo6y1phbdjG3qArj-Q/search?query='+encodeURIComponent('ACIM Lesson '+L);
+  // commentary: standard search URL — works the same on desktop and in the iPhone YouTube app
+  document.getElementById('commentaryBtn').href='https://www.youtube.com/results?search_query='+encodeURIComponent('Channeling Jesus ACIM Lesson '+L+' commentary');
 
   const has=Object.keys(data.lessons).length>0;
   const les=data.lessons[L];

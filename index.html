@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="First Light">
+<meta name="theme-color" content="#20243A">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>First Light — A daily practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#20243A; --ink-soft:#4A5066; --paper:#EDEFF4; --card:#F8F9FC; --line:#DCDEE8;
+    --light:#E0A33C; --light-soft:#F6E6CE; --shadow:#6B7186; --shadow-soft:#D9DCE6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:'Figtree',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    -webkit-font-smoothing:antialiased;padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none}
+  .wrap{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+  header{position:relative;overflow:hidden;padding:calc(env(safe-area-inset-top) + 24px) 22px 20px;color:#fff}
+  .horizon{position:absolute;inset:0;z-index:0;
+    background:radial-gradient(120% 90% at 50% 118%,var(--light) 0%,#C77F33 14%,#6E5C6E calc(38% - var(--dawn,0%)),#3A3F5C 70%,#20243A 100%);
+    transition:background 1.2s ease}
+  .horizon::after{content:"";position:absolute;inset:0;
+    background-image:radial-gradient(1px 1px at 20% 22%,#fff8 50%,transparent),radial-gradient(1px 1px at 68% 14%,#fff6 50%,transparent),radial-gradient(1px 1px at 84% 30%,#fff5 50%,transparent),radial-gradient(1px 1px at 38% 9%,#fff7 50%,transparent);
+    opacity:calc(1 - var(--dawn-n,0));transition:opacity 1.2s ease}
+  header > *{position:relative;z-index:1}
+  .eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;opacity:.78;font-weight:600}
+  .daynum{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:50px;line-height:.95;margin:6px 0 2px}
+  .daynum small{font-size:19px;opacity:.7;font-weight:400}
+  .nav-lesson{display:flex;align-items:center;gap:14px;margin-top:8px}
+  .nav-lesson button{width:34px;height:34px;border-radius:50%;border:1px solid #ffffff55;background:#ffffff14;color:#fff;font-size:18px;cursor:pointer;line-height:1}
+  .nav-lesson button:active{background:#ffffff33}
+  .nav-lesson button:disabled{opacity:.3}
+
+  main{flex:1;padding:18px 18px 100px}
+  .panel{display:none}
+  .panel.active{display:block;animation:rise .35s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+  .card h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;margin-bottom:4px}
+  .card p.sub{color:var(--ink-soft);font-size:14px;margin-bottom:14px}
+  .label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--shadow);font-weight:600;margin-bottom:8px}
+
+  .lesson-title{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;font-size:25px;line-height:1.25;margin-bottom:14px;color:var(--ink)}
+  .lesson-text{font-size:16.5px;line-height:1.62}
+  .lesson-text p{margin-bottom:13px}
+  .lesson-text p:last-child{margin-bottom:0}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:13px;
+    font-family:inherit;font-weight:600;font-size:15px;padding:13px 16px;cursor:pointer;width:100%;transition:transform .12s,filter .12s}
+  .btn:active{transform:scale(.98)}
+  .btn-light{background:var(--light);color:#3a2a08}
+  .btn-dark{background:var(--ink);color:#fff}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn-sm{padding:9px 12px;font-size:13px;width:auto;border-radius:10px}
+  .row{display:flex;gap:10px}
+  .row.tight{gap:8px;flex-wrap:wrap}
+
+  .tally{display:flex;gap:10px;margin:4px 0 16px}
+  .tally .t{flex:1;border-radius:16px;padding:14px;text-align:center}
+  .tally .forg{background:var(--light-soft)} .tally .judg{background:var(--shadow-soft)}
+  .tally .n{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:600;line-height:1}
+  .tally .forg .n{color:#B87514} .tally .judg .n{color:var(--shadow)}
+  .tally .k{font-size:12px;color:var(--ink-soft);margin-top:4px}
+
+  textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:12px;font-family:inherit;font-size:15px;resize:none;background:#fff;color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--shadow)}
+
+  .feed{margin-top:6px}
+  .entry{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+  .entry .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}
+  .entry .dot.f{background:var(--light)} .entry .dot.j{background:var(--shadow)}
+  .entry .body{flex:1;min-width:0}
+  .entry .when{font-size:12px;color:var(--shadow);margin-bottom:2px}
+  .entry .txt{font-size:15px} .entry .txt.empty{font-style:italic;color:var(--ink-soft)}
+  .del{background:none;border:none;color:var(--shadow);font-size:13px;cursor:pointer;padding:2px 4px}
+
+  .stats{display:flex;gap:10px;text-align:center}
+  .stats .s{flex:1}
+  .stats .v{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;line-height:1}
+  .stats .l{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .ring{display:grid;grid-template-columns:repeat(20,1fr);gap:4px;margin-top:4px}
+  .ring i{aspect-ratio:1;border-radius:2.5px;background:var(--shadow-soft)}
+  .ring i.done{background:var(--light)} .ring i.today{background:var(--ink);box-shadow:0 0 0 2px var(--light)}
+  .balance{height:14px;border-radius:7px;background:var(--shadow-soft);overflow:hidden;margin-top:4px}
+  .balance > i{display:block;height:100%;background:linear-gradient(90deg,var(--light),#EBB55C);transition:width .6s ease}
+  .balance-k{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-soft);margin-top:6px}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:13px;color:var(--ink-soft);margin-bottom:6px}
+  .field input{width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;font-family:inherit;font-size:15px;background:#fff;color:var(--ink)}
+  .toggle{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .switch{position:relative;width:48px;height:28px;flex:none}
+  .switch input{display:none}
+  .switch span{position:absolute;inset:0;background:var(--shadow-soft);border-radius:20px;transition:.2s;cursor:pointer}
+  .switch span::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;background:#fff;border-radius:50%;transition:.2s}
+  .switch input:checked + span{background:var(--light)}
+  .switch input:checked + span::after{transform:translateX(20px)}
+  .note{font-size:13px;color:var(--ink-soft);line-height:1.55} .note b{color:var(--ink)}
+  .steps{font-size:13.5px;color:var(--ink-soft);line-height:1.6;padding-left:18px} .steps li{margin-bottom:6px}
+  a.lnk{color:#B87514;font-weight:600;text-decoration:none}
+
+  nav{position:fixed;bottom:0;left:0;right:0;background:#fffffff2;backdrop-filter:blur(10px);border-top:1px solid var(--line);
+    display:flex;max-width:560px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;background:none;border:none;padding:11px 4px 12px;cursor:pointer;color:var(--shadow);font-family:inherit;font-size:11px;font-weight:600}
+  nav button.on{color:var(--ink)}
+  nav button .ic{display:block;font-size:19px;margin-bottom:2px;line-height:1}
+  .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;font-size:14px;opacity:0;pointer-events:none;transition:.3s;z-index:50}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="horizon" id="horizon"></div>
+    <div class="eyebrow">A Course in Miracles · Workbook</div>
+    <div class="daynum">Lesson <span id="dayNum">1</span><small>&nbsp;/ 365</small></div>
+    <div class="nav-lesson">
+      <button id="prevBtn" onclick="step(-1)" aria-label="Previous lesson">‹</button>
+      <button id="nextBtn" onclick="step(1)" aria-label="Next lesson">›</button>
+      <span id="navHint" style="font-size:13px;opacity:.8"></span>
+    </div>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section class="panel active" id="p-today">
+      <div class="card" id="lessonCard">
+        <div class="lesson-title" id="lessonTitle">Load your lessons to begin</div>
+        <div class="lesson-text" id="lessonText"></div>
+        <a id="commentaryBtn" class="btn btn-ghost" href="#" target="_blank" rel="noopener" style="margin-top:16px">▶ Watch Jesus' commentary ↗</a>
+      </div>
+
+      <div class="card">
+        <div class="row tight">
+          <button class="btn btn-light" onclick="step(1)">Move to next lesson →</button>
+        </div>
+        <p class="note" style="margin-top:10px">Want to stay with this one another day? Just don't advance — the lesson waits for you. Use ‹ › up top to revisit any lesson, anytime.</p>
+      </div>
+
+      <div class="card">
+        <div class="label">Today's practice</div>
+        <h2 style="margin-bottom:10px">Forgiveness over judgment</h2>
+        <div class="tally">
+          <div class="t forg"><div class="n" id="tForg">0</div><div class="k">forgiveness chosen</div></div>
+          <div class="t judg"><div class="n" id="tJudg">0</div><div class="k">judgment noticed</div></div>
+        </div>
+        <div class="row">
+          <button class="btn btn-light" onclick="quick('f')">＋ Chose forgiveness</button>
+          <button class="btn btn-ghost" onclick="quick('j')">＋ Noticed judgment</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRACTICE -->
+    <section class="panel" id="p-practice">
+      <div class="card">
+        <h2>Log a moment</h2>
+        <p class="sub">Notice where your mind went — and where you chose to put it instead.</p>
+        <textarea id="noteInput" rows="3" placeholder="What happened? What did you decide to see instead? (optional)"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button class="btn btn-light" onclick="logEntry('f')">Forgiveness</button>
+          <button class="btn btn-ghost" onclick="logEntry('j')">Judgment</button>
+        </div>
+      </div>
+      <div class="card"><div class="label">Today</div><div class="feed" id="todayFeed"></div></div>
+    </section>
+
+    <!-- JOURNEY -->
+    <section class="panel" id="p-journey">
+      <div class="card">
+        <h2>Your year</h2>
+        <p class="sub">Each square is a lesson. Lit squares are lessons you've practiced.</p>
+        <div class="stats">
+          <div class="s"><div class="v" id="sDay">1</div><div class="l">current lesson</div></div>
+          <div class="s"><div class="v" id="sStreak">0</div><div class="l">day streak</div></div>
+          <div class="s"><div class="v" id="sDone">0</div><div class="l">days practiced</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">The shift, all time</div>
+        <div class="balance"><i id="balBar" style="width:50%"></i></div>
+        <div class="balance-k"><span id="balForg">0 forgiveness</span><span id="balJudg">0 judgment</span></div>
+        <p class="note" style="margin-top:12px">This leans toward light as forgiveness outweighs judgment over time. Judgment noticed is not failure — noticing is the practice.</p>
+      </div>
+      <div class="card"><div class="label">365 lessons</div><div class="ring" id="ring"></div></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="panel" id="p-settings">
+      <div class="card">
+        <div class="label">One-time setup</div>
+        <h2>Load the lessons</h2>
+        <p class="sub" id="loadStatus">No lessons loaded yet.</p>
+        <ol class="steps">
+          <li>Open the free public-domain Workbook at <a class="lnk" href="https://openacim.org/" target="_blank" rel="noopener">openacim.org</a> (or the official reader, <a class="lnk" href="https://lessons.acim.org/en/" target="_blank" rel="noopener">lessons.acim.org</a>).</li>
+          <li>Select all the Workbook text (all 365 lessons) and copy it, or save it as a <b>.txt</b> file.</li>
+          <li>Paste below, or load the file — then tap Build.</li>
+        </ol>
+        <textarea id="importText" rows="4" placeholder="Paste the full Workbook text here…" style="margin-top:12px"></textarea>
+        <div class="row tight" style="margin-top:10px">
+          <button class="btn btn-light btn-sm" onclick="buildFromPaste()">Build lessons</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('txtFile').click()">Load a .txt file</button>
+          <button class="btn btn-ghost btn-sm" onclick="pullRepo()">Pull from repo</button>
+        </div>
+        <input type="file" id="txtFile" accept=".txt,.md,text/plain" style="display:none" onchange="buildFromFile(event)">
+        <p class="note" style="margin-top:10px">Easiest: put a file named <b>lessons.md</b> (or <b>lessons.txt</b>) in the same repo folder as the app — it loads automatically on first open. The text stays on your device after that.</p>
+      </div>
+
+      <div class="card">
+        <h2>Pacing</h2>
+        <div class="toggle" style="margin-top:8px">
+          <div><b style="font-size:15px">Advance automatically each day</b><div class="note">Off = self-paced. You move lessons yourself, and repeat any by staying.</div></div>
+          <label class="switch"><input type="checkbox" id="autoAdv" onchange="toggleAuto()"><span></span></label>
+        </div>
+        <div class="field" id="startField" style="margin-top:14px;display:none">
+          <label>Day you started Lesson 1</label>
+          <input type="date" id="startDate" onchange="saveStart()">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Never lose your year</div>
+        <h2 style="margin-bottom:8px">Backup</h2>
+        <p class="note" style="margin-bottom:12px">Download a copy now and then; restore it on a new phone. (Includes your lessons + practice log.)</p>
+        <div class="row"><button class="btn btn-ghost" onclick="exportData()">Download backup</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Restore</button></div>
+        <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <button class="on" data-p="today" onclick="go('today',this)"><span class="ic">☀︎</span>Today</button>
+    <button data-p="practice" onclick="go('practice',this)"><span class="ic">✎</span>Practice</button>
+    <button data-p="journey" onclick="go('journey',this)"><span class="ic">◴</span>Journey</button>
+    <button data-p="settings" onclick="go('settings',this)"><span class="ic">⚙</span>Settings</button>
+  </nav>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const mem={};
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return k in mem?mem[k]:null}},
+  set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+const KEY='firstlight.v2';
+let data=load();
+
+function load(){
+  const raw=store.get(KEY);
+  if(raw){try{return Object.assign(blank(),JSON.parse(raw))}catch(e){}}
+  return blank();
+}
+function blank(){return {mode:'manual',startDate:todayISO(),currentLesson:1,lessons:{},entries:[]};}
+function save(){store.set(KEY,JSON.stringify(data));}
+
+function todayISO(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString().slice(0,10);}
+function dateKey(ts){return new Date(ts).toISOString().slice(0,10);}
+function daysBetween(a,b){return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000);}
+function clamp(n,lo,hi){return Math.max(lo,Math.min(hi,n));}
+
+function activeLesson(){
+  if(data.mode==='auto') return clamp(daysBetween(data.startDate,todayISO())+1,1,365);
+  return clamp(data.currentLesson,1,365);
+}
+function step(d){
+  if(data.mode==='auto'){data.mode='manual';document.getElementById('autoAdv').checked=false;document.getElementById('startField').style.display='none';}
+  data.currentLesson=clamp(activeLesson()+d,1,365);
+  data.entries.push({ts:Date.now(),type:'read',lesson:data.currentLesson});
+  // record a "read" marker only when moving forward to a new one is optional; keep simple: mark practiced
+  save();render();
+  if(d>0)toast('Lesson '+data.currentLesson);
+}
+
+/* ---------- lesson import ---------- */
+function parseWorkbook(raw){
+  const text=raw.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines=text.split('\n');
+  const heads=[];
+  // matches "Lesson 5", "LESSON 361 TO 365", "Lesson 1-5", "Lesson 1 through 5"
+  const re=/^\s*Lesson\s+(\d{1,3})(?:\s*(?:to|through|[-–—])\s*(\d{1,3}))?\b/i;
+  lines.forEach((ln,i)=>{const m=ln.match(re);if(m){const a=parseInt(m[1]);const b=m[2]?parseInt(m[2]):a;
+    if(a>=1&&a<=365)heads.push({i,a,b:Math.min(b,365)});}});
+  const out={};
+  for(let h=0;h<heads.length;h++){
+    const start=heads[h].i, end=(h+1<heads.length)?heads[h+1].i:lines.length;
+    const block=lines.slice(start+1,end).map(s=>s.trim());
+    let ti=0; while(ti<block.length && block[ti]==='') ti++;
+    const title=block[ti]||'';
+    const body=block.slice(ti+1).join('\n').trim();
+    for(let n=heads[h].a;n<=heads[h].b;n++){ if(!out[n]) out[n]={title:title||('Lesson '+n),text:body}; }
+  }
+  return out;
+}
+function applyLessons(obj){
+  const count=Object.keys(obj).length;
+  if(count<50){toast('Found only '+count+' lessons — check the text');return;}
+  data.lessons=obj; save(); render();
+  toast('Loaded '+count+' lessons');
+  go('today',document.querySelector('nav button[data-p="today"]'));
+}
+function buildFromPaste(){const t=document.getElementById('importText').value;if(t.trim().length<200){toast('Paste the full text first');return;}applyLessons(parseWorkbook(t));}
+function buildFromFile(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>applyLessons(parseWorkbook(r.result));r.readAsText(f);}
+
+/* ---------- render ---------- */
+function render(){
+  const L=activeLesson();
+  document.getElementById('dayNum').textContent=L;
+  document.getElementById('sDay').textContent=L;
+  document.getElementById('prevBtn').disabled=(L<=1);
+  document.getElementById('nextBtn').disabled=(L>=365);
+  document.getElementById('navHint').textContent=data.mode==='auto'?'(auto · tap to take over)':'';
+
+  // commentary: search the channel for this lesson — lands the matching video on top
+  document.getElementById('commentaryBtn').href='https://www.youtube.com/channel/UCr7RBMo6y1phbdjG3qArj-Q/search?query='+encodeURIComponent('ACIM Lesson '+L);
+
+  const has=Object.keys(data.lessons).length>0;
+  const les=data.lessons[L];
+  document.getElementById('lessonTitle').textContent= les? les.title : (has?('Lesson '+L):'Load your lessons to begin');
+  const tx=document.getElementById('lessonText');
+  if(les&&les.text){tx.innerHTML=les.text.split(/\n\s*\n/).map(p=>'<p>'+esc(p.replace(/\n/g,' '))+'</p>').join('');}
+  else if(has){tx.innerHTML='<p class="note">No text stored for this lesson. Re-import if needed.</p>';}
+  else{tx.innerHTML='<p class="note">Go to <b>Settings → Load the lessons</b>. One paste and every lesson lives here, offline.</p>';}
+
+  document.getElementById('loadStatus').textContent= has? (Object.keys(data.lessons).length+' lessons loaded ✦') : 'No lessons loaded yet.';
+  document.getElementById('autoAdv').checked=(data.mode==='auto');
+  document.getElementById('startField').style.display=(data.mode==='auto')?'block':'none';
+  document.getElementById('startDate').value=data.startDate;
+
+  const all=data.entries.filter(e=>e.type==='f'||e.type==='j');
+  const f=all.filter(e=>e.type==='f').length, j=all.filter(e=>e.type==='j').length;
+  const ratio=(f+j)===0?0.5:f/(f+j);
+  document.getElementById('horizon').style.setProperty('--dawn',Math.round(ratio*30)+'%');
+  document.getElementById('horizon').style.setProperty('--dawn-n',ratio.toFixed(2));
+
+  const tk=todayISO();
+  const todays=all.filter(e=>dateKey(e.ts)===tk);
+  document.getElementById('tForg').textContent=todays.filter(e=>e.type==='f').length;
+  document.getElementById('tJudg').textContent=todays.filter(e=>e.type==='j').length;
+  const feed=document.getElementById('todayFeed');
+  feed.innerHTML= todays.length? todays.slice().reverse().map(entryHTML).join('') : '<p class="note">No moments logged yet today. The first one is the practice beginning.</p>';
+
+  document.getElementById('sStreak').textContent=streak();
+  document.getElementById('sDone').textContent=new Set(data.entries.map(e=>dateKey(e.ts))).size;
+  const pct=(f+j)===0?50:Math.round(f/(f+j)*100);
+  document.getElementById('balBar').style.width=pct+'%';
+  document.getElementById('balForg').textContent=f+' forgiveness';
+  document.getElementById('balJudg').textContent=j+' judgment';
+
+  const ring=document.getElementById('ring');
+  if(ring.childElementCount!==365) ring.innerHTML=Array.from({length:365},()=>'<i></i>').join('');
+  const practiced=new Set(data.entries.filter(e=>e.lesson).map(e=>e.lesson));
+  [...ring.children].forEach((el,i)=>{const ln=i+1;el.className='';if(practiced.has(ln))el.classList.add('done');if(ln===L)el.classList.add('today');});
+}
+function entryHTML(e){
+  const when=new Date(e.ts).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+  const txt=e.note?esc(e.note):(e.type==='f'?'Chose forgiveness':'Noticed judgment');
+  return '<div class="entry"><span class="dot '+e.type+'"></span><div class="body"><div class="when">'+when+' · '+(e.type==='f'?'Forgiveness':'Judgment')+'</div><div class="txt'+(e.note?'':' empty')+'">'+txt+'</div></div><button class="del" onclick="removeEntry('+e.ts+')">remove</button></div>';
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function streak(){
+  const days=new Set(data.entries.map(e=>dateKey(e.ts)));
+  let s=0,d=new Date();d.setHours(0,0,0,0);
+  if(!days.has(d.toISOString().slice(0,10)))d.setDate(d.getDate()-1);
+  while(days.has(d.toISOString().slice(0,10))){s++;d.setDate(d.getDate()-1);}
+  return s;
+}
+
+/* ---------- actions ---------- */
+function quick(t){data.entries.push({ts:Date.now(),type:t,note:'',lesson:activeLesson()});save();render();toast(t==='f'?'Forgiveness chosen ✦':'Noticed — that is the practice');}
+function logEntry(t){const ta=document.getElementById('noteInput');data.entries.push({ts:Date.now(),type:t,note:ta.value.trim(),lesson:activeLesson()});ta.value='';save();render();go('today',document.querySelector('nav button[data-p="today"]'));toast('Logged');}
+function removeEntry(ts){data.entries=data.entries.filter(e=>e.ts!==ts);save();render();}
+function toggleAuto(){data.mode=document.getElementById('autoAdv').checked?'auto':'manual';if(data.mode==='manual')data.currentLesson=activeLesson();save();render();}
+function saveStart(){data.startDate=document.getElementById('startDate').value||todayISO();save();render();}
+function exportData(){const b=new Blob([JSON.stringify(data)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='first-light-backup-'+todayISO()+'.json';a.click();toast('Backup downloaded');}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=Object.assign(blank(),JSON.parse(r.result));save();render();toast('Restored');}catch(e){toast('Could not read that file');}};r.readAsText(f);}
+
+function go(p,btn){document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));document.getElementById('p-'+p).classList.add('active');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');window.scrollTo(0,0);}
+let toastT;function toast(m){const el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1900);}
+
+render();
+
+/* ---------- auto-load lessons from a file in the same repo folder ---------- */
+async function fetchLessons(){
+  for(const name of ['lessons.md','lessons.txt']){
+    try{
+      const res=await fetch(name+'?v='+Date.now());
+      if(!res.ok) continue;
+      const txt=await res.text();
+      const parsed=parseWorkbook(txt);
+      if(Object.keys(parsed).length>=50) return parsed;
+    }catch(e){}
+  }
+  return null;
+}
+async function autoload(){
+  if(Object.keys(data.lessons).length) return;      // already stored on this device
+  const parsed=await fetchLessons();
+  if(parsed){ data.lessons=parsed; save(); render(); toast('Loaded '+Object.keys(parsed).length+' lessons'); }
+}
+async function pullRepo(){
+  const parsed=await fetchLessons();
+  if(parsed){ applyLessons(parsed); } else { toast('No lessons.md / lessons.txt found in the app folder'); }
+}
+autoload();
+</script>
+</body>
+</html>
